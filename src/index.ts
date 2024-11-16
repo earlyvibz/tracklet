@@ -54,9 +54,10 @@ async function main(): Promise<void> {
         await bot.sendMessage(telegramChatId, message, {
           parse_mode: "Markdown",
         });
+
+        console.log("Notification sent to Telegram successfully.");
       }
 
-      console.log("Notification sent to Telegram successfully.");
       res.status(200).send("Alchemy Notify is the best!");
     } catch (error) {
       console.error(
