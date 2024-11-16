@@ -129,6 +129,10 @@ async function main(): Promise<void> {
           continue; // Ignore cette activité et passe à la suivante
         }
 
+        if (asset === "ETH") {
+          continue;
+        }
+
         const message = `
 🚀 *New Wallet Event* 🚀
 \\- Network: \`${webhookEvent.event.network || "Unknown"}\`
@@ -139,6 +143,7 @@ async function main(): Promise<void> {
 \\- Transaction Hash: \`${hash}\`
 \\- Block Number: \`${blockNum}\`
 \\- Date: \`${webhookEvent.createdAt || "Unknown"}\`
+\\- Link: https://dexscreener.com/base/${toAddress}
       `;
 
         // Envoyer le message à Telegram
