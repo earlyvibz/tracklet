@@ -129,7 +129,8 @@ async function main(): Promise<void> {
           continue; // Ignore cette activité et passe à la suivante
         }
 
-        if (asset === "ETH") {
+        // Skip ETH transactions
+        if (asset === "ETH" || asset === "WETH" || asset === "USDC") {
           continue;
         }
 
@@ -139,11 +140,8 @@ async function main(): Promise<void> {
 \\- Asset: \`${asset}\`
 \\- From: \`${fromAddress}\`
 \\- To: \`${toAddress}\`
-\\- Value: \`${value || "Unknown"}\`
-\\- Transaction Hash: \`${hash}\`
-\\- Block Number: \`${blockNum}\`
-\\- Date: \`${webhookEvent.createdAt || "Unknown"}\`
 \\- Link: https://dexscreener.com/base/${toAddress}
+\\- hash: https://basescan.org/tx/${hash}
       `;
 
         // Envoyer le message à Telegram
