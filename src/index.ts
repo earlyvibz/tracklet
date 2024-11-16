@@ -131,20 +131,20 @@ async function main(): Promise<void> {
 
         const message = `
 🚀 *New Wallet Event* 🚀
-- Network: ${webhookEvent.event.network || "Unknown"}
-- Asset: ${asset}
-- From: ${fromAddress}
-- To: ${toAddress}
-- Value: ${value || "Unknown"}
-- Transaction Hash: ${hash}
-- Block Number: ${blockNum}
-- Date: ${webhookEvent.createdAt || "Unknown"}
+\\- Network: \`${webhookEvent.event.network || "Unknown"}\`
+\\- Asset: \`${asset}\`
+\\- From: \`${fromAddress}\`
+\\- To: \`${toAddress}\`
+\\- Value: \`${value || "Unknown"}\`
+\\- Transaction Hash: \`${hash}\`
+\\- Block Number: \`${blockNum}\`
+\\- Date: \`${webhookEvent.createdAt || "Unknown"}\`
       `;
 
         // Envoyer le message à Telegram
         try {
           await bot.sendMessage(telegramChatId, message, {
-            parse_mode: "MarkdownV2",
+            parse_mode: "Markdown",
           });
           console.log(
             "Notification sent to Telegram successfully for activity:",
