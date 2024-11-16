@@ -103,36 +103,65 @@ async function main(): Promise<void> {
   );
   app.use(validateAlchemySignature(signingKey));
 
-  // Register handler for Alchemy Notify webhook events
   app.post("/webhook-path", async (req, res) => {
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
 
     try {
-      if (webhookEvent.event.activity) {
-        const message = `
-🚀 *New Wallet Event* 🚀
-- Network: ${webhookEvent.event.network}
-- Asset: ${webhookEvent.event.activity[0].asset}
-- Address: ${webhookEvent.event.activity[0].fromAddress}
-- To: ${webhookEvent.event.activity[0].toAddress}
-- Date: ${webhookEvent.event.createdAt}
-        `;
-
-        // Send the message to Telegram
-        await bot.sendMessage(telegramChatId, message, {
-          parse_mode: "Markdown",
-        });
-
-        console.log("Notification sent to Telegram successfully.");
+      // Vérifier que event et activity existent
+      if (
+        !webhookEvent.event ||
+        !webhookEvent.event.activity ||
+        !Array.isArray(webhookEvent.event.activity)
+      ) {
+        throw new Error(
+          "Invalid webhook payload: 'event.activity' is missing or invalid."
+        );
       }
 
-      res.status(200).send("Alchemy Notify is the best!");
+      for (const activity of webhookEvent.event.activity) {
+        // Vérifier que chaque champ clé est défini
+        const { asset, fromAddress, toAddress, value, hash, blockNum } =
+          activity;
+
+        if (!asset || !fromAddress || !toAddress || !hash || !blockNum) {
+          console.warn("Invalid activity data:", activity);
+          continue; // Ignore cette activité et passe à la suivante
+        }
+
+        const message = `
+🚀 *New Wallet Event* 🚀
+- Network: ${webhookEvent.event.network || "Unknown"}
+- Asset: ${asset}
+- From: ${fromAddress}
+- To: ${toAddress}
+- Value: ${value || "Unknown"}
+- Transaction Hash: ${hash}
+- Block Number: ${blockNum}
+- Date: ${webhookEvent.createdAt || "Unknown"}
+      `;
+
+        // Envoyer le message à Telegram
+        try {
+          await bot.sendMessage(telegramChatId, message, {
+            parse_mode: "Markdown",
+          });
+          console.log(
+            "Notification sent to Telegram successfully for activity:",
+            hash
+          );
+        } catch (error) {
+          console.error(
+            "Error sending Telegram message for activity:",
+            hash,
+            error
+          );
+        }
+      }
+
+      res.status(200).send("Webhook processed successfully.");
     } catch (error) {
-      console.error(
-        "Error processing webhook or sending Telegram message:",
-        error
-      );
+      console.error("Error processing webhook:", error);
       res.status(500).send("Failed to process the webhook.");
     }
   });
