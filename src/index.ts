@@ -113,8 +113,8 @@ async function main(): Promise<void> {
         const message = `
 🚀 *New Wallet Event* 🚀
 - Network: ${webhookEvent.event.network}
-- Address: ${webhookEvent.event.activity.fromAddress}
-- To: ${webhookEvent.event.activity.toAddress}
+- Address: ${webhookEvent.event.activity[0].fromAddress}
+- To: ${webhookEvent.event.activity[0].toAddress}
 - Date: ${webhookEvent.event.createdAt}
         `;
 
