@@ -144,7 +144,7 @@ async function main(): Promise<void> {
         // Envoyer le message à Telegram
         try {
           await bot.sendMessage(telegramChatId, message, {
-            parse_mode: "Markdown",
+            parse_mode: "MarkdownV2",
           });
           console.log(
             "Notification sent to Telegram successfully for activity:",
