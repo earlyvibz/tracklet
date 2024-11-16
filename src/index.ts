@@ -6,6 +6,7 @@ import {
   AlchemyWebhookEvent,
 } from "./webhooksUtil";
 import TelegramBot from "node-telegram-bot-api";
+import { Alchemy, Network } from "alchemy-sdk";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -24,9 +25,75 @@ async function main(): Promise<void> {
   const signingKey = getRequiredEnvVar("SIGNING_KEY");
   const telegramToken = getRequiredEnvVar("TELEGRAM_BOT_TOKEN");
   const telegramChatId = getRequiredEnvVar("TELEGRAM_CHAT_ID");
+  const alchemyAuthToken = getRequiredEnvVar("ALCHEMY_AUTH_TOKEN");
+  const alchemyWebhookId = getRequiredEnvVar("ALCHEMY_WEBHOOK_ID");
 
   // Initialize Telegram Bot
-  const bot = new TelegramBot(telegramToken, { polling: false });
+  const bot = new TelegramBot(telegramToken, { polling: true });
+
+  // Initialize Alchemy SDK
+  const alchemySettings = {
+    authToken: alchemyAuthToken,
+    network: Network.ETH_MAINNET, // Update to your desired network
+  };
+  const alchemy = new Alchemy(alchemySettings);
+
+  // Telegram commands to add and remove addresses
+  bot.onText(/\/addaddress (.+)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const address = match ? match[1] : null;
+
+    if (!address) {
+      bot.sendMessage(chatId, "Please provide a valid Ethereum address.");
+      return;
+    }
+
+    try {
+      // Add the address to the webhook
+      await alchemy.notify.updateWebhook(alchemyWebhookId, {
+        addAddresses: [address],
+      });
+
+      bot.sendMessage(
+        chatId,
+        `Address ${address} has been successfully added for tracking.`
+      );
+    } catch (error: any) {
+      console.error("Error adding address:", error);
+      bot.sendMessage(
+        chatId,
+        `Failed to add address ${address}: ${error.message}`
+      );
+    }
+  });
+
+  bot.onText(/\/removeaddress (.+)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const address = match ? match[1] : null;
+
+    if (!address) {
+      bot.sendMessage(chatId, "Please provide a valid Ethereum address.");
+      return;
+    }
+
+    try {
+      // Remove the address from the webhook
+      await alchemy.notify.updateWebhook(alchemyWebhookId, {
+        removeAddresses: [address],
+      });
+
+      bot.sendMessage(
+        chatId,
+        `Address ${address} has been successfully removed from tracking.`
+      );
+    } catch (error: any) {
+      console.error("Error removing address:", error);
+      bot.sendMessage(
+        chatId,
+        `Failed to remove address ${address}: ${error.message}`
+      );
+    }
+  });
 
   // Middleware needed to validate the Alchemy signature
   app.use(
@@ -43,11 +110,11 @@ async function main(): Promise<void> {
     try {
       if (webhookEvent.event.activity) {
         const message = `
-    🚀 *New Wallet Event* 🚀
-    - Network: ${webhookEvent.event.activity.network}
-    - Address: ${webhookEvent.event.activity.fromAddress}
-    - To: ${webhookEvent.event.activity.toAddress}
-    - Date: ${webhookEvent.event.createdAt}
+🚀 *New Wallet Event* 🚀
+- Network: ${webhookEvent.event.activity.network}
+- Address: ${webhookEvent.event.activity.fromAddress}
+- To: ${webhookEvent.event.activity.toAddress}
+- Date: ${webhookEvent.event.createdAt}
         `;
 
         // Send the message to Telegram
