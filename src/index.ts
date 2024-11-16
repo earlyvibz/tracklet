@@ -106,6 +106,7 @@ async function main(): Promise<void> {
   // Register handler for Alchemy Notify webhook events
   app.post("/webhook-path", async (req, res) => {
     const webhookEvent = req.body as AlchemyWebhookEvent;
+    console.log("Received webhook event:", webhookEvent);
 
     try {
       if (webhookEvent.event.activity) {
