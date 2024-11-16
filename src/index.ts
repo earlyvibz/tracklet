@@ -41,21 +41,20 @@ async function main(): Promise<void> {
     const webhookEvent = req.body as AlchemyWebhookEvent;
 
     try {
-      console.log(`Processing webhook event id: ${webhookEvent.id}`);
-      console.log("Event Details:", webhookEvent.event);
+      if (webhookEvent.event.activity) {
+        const message = `
+    🚀 *New Wallet Event* 🚀
+    - Network: ${webhookEvent.event.activity.network}
+    - Address: ${webhookEvent.event.activity.fromAddress}
+    - To: ${webhookEvent.event.activity.toAddress}
+    - Date: ${webhookEvent.event.createdAt}
+        `;
 
-      // Construct the Telegram message
-      const message = `
-🚀 *New Alchemy Event* 🚀
-- Event ID: ${webhookEvent.id}
-- Type: ${webhookEvent.type}
-- Details: ${JSON.stringify(webhookEvent.event, null, 2)}
-      `;
-
-      // Send the message to Telegram
-      await bot.sendMessage(telegramChatId, message, {
-        parse_mode: "Markdown",
-      });
+        // Send the message to Telegram
+        await bot.sendMessage(telegramChatId, message, {
+          parse_mode: "Markdown",
+        });
+      }
 
       console.log("Notification sent to Telegram successfully.");
       res.status(200).send("Alchemy Notify is the best!");
