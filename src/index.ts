@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   const alchemy = new Alchemy(alchemySettings);
 
   // Telegram commands to add and remove addresses
-  bot.onText(/\/addaddress (.+)/, async (msg, match) => {
+  bot.onText(/\/add (.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const address = match ? match[1] : null;
 
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
     }
   });
 
-  bot.onText(/\/removeaddress (.+)/, async (msg, match) => {
+  bot.onText(/\/rm (.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const address = match ? match[1] : null;
 
