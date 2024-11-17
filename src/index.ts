@@ -49,6 +49,15 @@ async function main(): Promise<void> {
     }
 
     try {
+      // Check if address already exists
+      const existingAddresses = await alchemy.notify.getAddresses(
+        alchemyWebhookId
+      );
+      if (existingAddresses.addresses.includes(address)) {
+        bot.sendMessage(chatId, `Address ${address} is already being tracked.`);
+        return;
+      }
+
       // Add the address to the webhook
       await alchemy.notify.updateWebhook(alchemyWebhookId, {
         addAddresses: [address],
