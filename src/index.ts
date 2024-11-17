@@ -160,7 +160,8 @@ async function main(): Promise<void> {
 \\- Asset: \`${asset}\`
 \\- From: \`${fromAddress}\`
 \\- To: \`${toAddress}\`
-\\- Link: https://dexscreener.com/base/${fromAddress}
+\\- LinkFrom: https://dexscreener.com/base/${fromAddress}
+\\- LinkTo: https://dexscreener.com/base/${toAddress}
 \\- hash: https://basescan.org/tx/${hash}
       `;
 
