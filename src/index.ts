@@ -95,6 +95,26 @@ async function main(): Promise<void> {
     }
   });
 
+  // Add this after your other bot.onText commands
+  bot.onText(/\/list/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    try {
+      const addresses = await alchemy.notify.getAddresses(alchemyWebhookId);
+
+      if (!addresses.addresses.length) {
+        bot.sendMessage(chatId, "No addresses are currently being tracked.");
+        return;
+      }
+
+      const addressList = addresses.addresses.join("\n");
+      bot.sendMessage(chatId, `Currently tracked addresses:\n${addressList}`);
+    } catch (error: any) {
+      console.error("Error listing addresses:", error);
+      bot.sendMessage(chatId, `Failed to list addresses: ${error.message}`);
+    }
+  });
+
   // Middleware needed to validate the Alchemy signature
   app.use(
     express.json({
