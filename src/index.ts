@@ -133,6 +133,7 @@ async function main(): Promise<void> {
   app.use(validateAlchemySignature(signingKey));
 
   app.post("/webhook-path", async (req, res) => {
+    const hotwallets = ["0xd2507b4958b449695201599e8d8a25f4bab5dead"];
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
 
@@ -163,15 +164,17 @@ async function main(): Promise<void> {
           continue;
         }
 
+        const isHotWallet =
+          hotwallets.includes(fromAddress) || hotwallets.includes(toAddress);
+        const hotWalletPrefix = isHotWallet ? "🔥 HOT WALLET ALERT 🔥\n" : "";
+
         const message = `
-🚀 *New Wallet Event* 🚀
+${hotWalletPrefix}🚀 *New Wallet Event* 🚀
 \\- Network: \`${webhookEvent.event.network || "Unknown"}\`
 \\- Asset: \`${asset}\`
-\\- From: \`${fromAddress}\`
-\\- To: \`${toAddress}\`
-\\- LinkFrom: https://dexscreener.com/base/${fromAddress}
-\\- LinkTo: https://dexscreener.com/base/${toAddress}
-\\- hash: https://basescan.org/tx/${hash}
+\\- From: \`${fromAddress}\` [(view)](https://dexscreener.com/base/${fromAddress})
+\\- To: \`${toAddress}\` [(view)](https://dexscreener.com/base/${toAddress})
+\\- [View Transaction](https://basescan.org/tx/${hash})
       `;
 
         // Envoyer le message à Telegram
