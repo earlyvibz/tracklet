@@ -133,7 +133,10 @@ async function main(): Promise<void> {
   app.use(validateAlchemySignature(signingKey));
 
   app.post("/webhook-path", async (req, res) => {
-    const hotwallets = ["0xd2507b4958b449695201599e8d8a25f4bab5dead"];
+    const hotwallets = [
+      "0xd2507b4958b449695201599e8d8a25f4bab5dead",
+      "0xBCA00B4D1D12C245096F08c6047e88d9F787762F",
+    ];
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
 
