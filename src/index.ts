@@ -154,8 +154,16 @@ async function main(): Promise<void> {
 
       for (const activity of webhookEvent.event.activity) {
         // Vérifier que chaque champ clé est défini
-        const { asset, fromAddress, toAddress, value, hash, blockNum } =
-          activity;
+        const {
+          asset,
+          fromAddress,
+          toAddress,
+          value,
+          hash,
+          blockNum,
+          erc721TokenId,
+          erc1155Metadata,
+        } = activity;
 
         if (!asset || !fromAddress || !toAddress || !hash || !blockNum) {
           console.warn("Invalid activity data:", activity);
@@ -167,16 +175,19 @@ async function main(): Promise<void> {
           continue;
         }
 
+        if (erc721TokenId || erc1155Metadata) {
+          continue;
+        }
+
         const isHotWallet =
           hotwallets.includes(fromAddress) || hotwallets.includes(toAddress);
         const hotWalletPrefix = isHotWallet ? "🔥 HOT WALLET ALERT 🔥\n" : "";
 
         const message = `
-${hotWalletPrefix}🚀 *New Wallet Event* 🚀
-\\- Network: \`${webhookEvent.event.network || "Unknown"}\`
+${hotWalletPrefix}
 \\- Asset: \`${asset}\`
-\\- From: \`${fromAddress}\` [(view)](https://dexscreener.com/base/${fromAddress})
-\\- To: \`${toAddress}\` [(view)](https://dexscreener.com/base/${toAddress})
+\\- From: \`${fromAddress}\` [(dexscreener)](https://dexscreener.com/base/${fromAddress}) [(basescan)](https://basescan.org/address/${fromAddress})
+\\- To: \`${toAddress}\` [(dexscreener)](https://dexscreener.com/base/${toAddress}) [(basescan)](https://basescan.org/address/${toAddress})
 \\- [View Transaction](https://basescan.org/tx/${hash})
       `;
 
