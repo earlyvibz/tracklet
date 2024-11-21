@@ -171,7 +171,12 @@ async function main(): Promise<void> {
         }
 
         // Skip ETH transactions
-        if (asset === "ETH" || asset === "WETH" || asset === "USDC") {
+        if (
+          asset === "ETH" ||
+          asset === "WETH" ||
+          asset === "USDC" ||
+          asset === "VIRTUAL"
+        ) {
           continue;
         }
 
