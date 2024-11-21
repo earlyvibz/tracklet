@@ -14,12 +14,10 @@ dotenv.config();
 async function main(): Promise<void> {
   const app = express();
 
-  // Set default environment variables
   setDefaultEnvVar("PORT", "8080");
   setDefaultEnvVar("HOST", "127.0.0.1");
   setDefaultEnvVar("SIGNING_KEY", "whsec_test");
 
-  // Load required environment variables
   const port = +getRequiredEnvVar("PORT");
   const host = getRequiredEnvVar("HOST");
   const signingKey = getRequiredEnvVar("SIGNING_KEY");
