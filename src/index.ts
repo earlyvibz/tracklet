@@ -28,17 +28,14 @@ async function main(): Promise<void> {
   const alchemyAuthToken = getRequiredEnvVar("ALCHEMY_AUTH_TOKEN");
   const alchemyWebhookId = getRequiredEnvVar("ALCHEMY_WEBHOOK_ID");
 
-  // Initialize Telegram Bot
   const bot = new TelegramBot(telegramToken, { polling: true });
 
-  // Initialize Alchemy SDK
   const alchemySettings = {
     authToken: alchemyAuthToken,
-    network: Network.ETH_MAINNET, // Update to your desired network
+    network: Network.ETH_MAINNET,
   };
   const alchemy = new Alchemy(alchemySettings);
 
-  // Telegram commands to add and remove addresses
   bot.onText(/\/add (.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const address = match ? match[1] : null;
@@ -49,7 +46,6 @@ async function main(): Promise<void> {
     }
 
     try {
-      // Check if address already exists
       const existingAddresses = await alchemy.notify.getAddresses(
         alchemyWebhookId
       );
@@ -58,7 +54,6 @@ async function main(): Promise<void> {
         return;
       }
 
-      // Add the address to the webhook
       await alchemy.notify.updateWebhook(alchemyWebhookId, {
         addAddresses: [address],
       });
@@ -86,7 +81,6 @@ async function main(): Promise<void> {
     }
 
     try {
-      // Remove the address from the webhook
       await alchemy.notify.updateWebhook(alchemyWebhookId, {
         removeAddresses: [address],
       });
@@ -104,7 +98,6 @@ async function main(): Promise<void> {
     }
   });
 
-  // Add this after your other bot.onText commands
   bot.onText(/\/list/, async (msg) => {
     const chatId = msg.chat.id;
 
@@ -124,7 +117,6 @@ async function main(): Promise<void> {
     }
   });
 
-  // Middleware needed to validate the Alchemy signature
   app.use(
     express.json({
       verify: addAlchemyContextToRequest,
@@ -141,7 +133,6 @@ async function main(): Promise<void> {
     console.log("Received webhook event:", webhookEvent);
 
     try {
-      // Vérifier que event et activity existent
       if (
         !webhookEvent.event ||
         !webhookEvent.event.activity ||
@@ -153,7 +144,6 @@ async function main(): Promise<void> {
       }
 
       for (const activity of webhookEvent.event.activity) {
-        // Vérifier que chaque champ clé est défini
         const {
           asset,
           fromAddress,
@@ -167,10 +157,9 @@ async function main(): Promise<void> {
 
         if (!asset || !fromAddress || !toAddress || !hash || !blockNum) {
           console.warn("Invalid activity data:", activity);
-          continue; // Ignore cette activité et passe à la suivante
+          continue;
         }
 
-        // Skip ETH transactions
         if (
           asset === "ETH" ||
           asset === "WETH" ||
@@ -196,7 +185,6 @@ ${hotWalletPrefix}
 \\- [View Transaction](https://basescan.org/tx/${hash})
       `;
 
-        // Envoyer le message à Telegram
         try {
           await bot.sendMessage(telegramChatId, message, {
             parse_mode: "Markdown",
@@ -221,7 +209,6 @@ ${hotWalletPrefix}
     }
   });
 
-  // Start the server
   app.listen(port, host, () => {
     console.log(
       `Example Alchemy Notify app listening at http://${host}:${port}`
