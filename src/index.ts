@@ -162,7 +162,7 @@ async function main(): Promise<void> {
         if (
           asset === "ETH" ||
           asset === "WETH" ||
-          asset === "USDC" ||
+          asset === "UЅDС" ||
           asset === "VIRTUAL"
         ) {
           continue;
