@@ -126,7 +126,6 @@ async function main(): Promise<void> {
     const hotwallets = [
       "0xd2507b4958b449695201599e8d8a25f4bab5dead",
       "0xBCA00B4D1D12C245096F08c6047e88d9F787762F",
-      "0x2969c20d13a05731732c41fc89c19b9d76b267cc",
     ];
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
