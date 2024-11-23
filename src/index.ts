@@ -146,7 +146,6 @@ async function main(): Promise<void> {
           asset,
           fromAddress,
           toAddress,
-          value,
           hash,
           blockNum,
           erc721TokenId,
