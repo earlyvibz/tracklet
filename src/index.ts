@@ -130,7 +130,7 @@ async function main(): Promise<void> {
 
     const whales = ["0x6552d32C1a0563d6bD434C761771341058862f78"];
 
-    const bigMultipliers = ["0xbdb902244f1235Fc686B2aF74f0e73163d47Fa08"];
+    const bigMultipliers = ["0xbdb902244f1235fc686b2af74f0e73163d47fa08"];
 
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
