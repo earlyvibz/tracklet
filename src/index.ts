@@ -130,6 +130,8 @@ async function main(): Promise<void> {
 
     const whales = ["0x6552d32C1a0563d6bD434C761771341058862f78"];
 
+    const bigMultipliers = ["0xbdb902244f1235Fc686B2aF74f0e73163d47Fa08"];
+
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
 
@@ -181,9 +183,17 @@ async function main(): Promise<void> {
           whales.includes(fromAddress) || whales.includes(toAddress);
         const whalePrefix = isWhale ? "🐳 WHALE ALERT 🐳\n" : "";
 
+        const isBigMultiplier =
+          bigMultipliers.includes(fromAddress) ||
+          bigMultipliers.includes(toAddress);
+        const bigMultiplierPrefix = isBigMultiplier
+          ? "💰 BIG MULTIPLIER ALERT 💰\n"
+          : "";
+
         const message = `
 ${hotWalletPrefix}
 ${whalePrefix}
+${bigMultiplierPrefix}
 \\- Asset: \`${asset}\`
 \\- From: \`${fromAddress}\` [(dexscreener)](https://dexscreener.com/base/${fromAddress}) [(basescan)](https://basescan.org/address/${fromAddress})
 \\- To: \`${toAddress}\` [(dexscreener)](https://dexscreener.com/base/${toAddress}) [(basescan)](https://basescan.org/address/${toAddress})
