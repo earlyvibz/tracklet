@@ -165,7 +165,7 @@ async function main(): Promise<void> {
 
         if (
           asset === "ETH" ||
-          asset === "WETH" ||
+          asset === "WEТH" ||
           asset === "UЅDС" ||
           asset === "VIRTUAL"
         ) {
