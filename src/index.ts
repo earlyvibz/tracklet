@@ -127,6 +127,7 @@ async function main(): Promise<void> {
       "0xd2507b4958b449695201599e8d8a25f4bab5dead",
       "0x6fb5489c6d6c11150e68d6d87dca963beb28d5b0",
       "0xc51e5421608efc404b76fcf4da7d44cdd8481903",
+      "0x8bb8fa6ce99208c1cddea7006679145a490ee58f",
     ];
 
     const whales = ["0x6552d32C1a0563d6bD434C761771341058862f78"];
