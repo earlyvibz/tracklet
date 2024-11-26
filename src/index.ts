@@ -133,6 +133,8 @@ async function main(): Promise<void> {
 
     const bigMultipliers = ["0xbdb902244f1235fc686b2af74f0e73163d47fa08"];
 
+    const suspiciousWallets = ["0x00081fbbd7175d902b459dc85f7da70cbd000000"];
+
     const webhookEvent = req.body as AlchemyWebhookEvent;
     console.log("Received webhook event:", webhookEvent);
 
@@ -191,10 +193,18 @@ async function main(): Promise<void> {
           ? "💰 BIG MULTIPLIER ALERT 💰\n"
           : "";
 
+        const isSuspiciousWallet =
+          suspiciousWallets.includes(fromAddress) ||
+          suspiciousWallets.includes(toAddress);
+        const suspiciousWalletPrefix = isSuspiciousWallet
+          ? "🚨 SUSPICIOUS WALLET ALERT 🚨\n"
+          : "";
+
         const message = `
 ${hotWalletPrefix}
 ${whalePrefix}
 ${bigMultiplierPrefix}
+${suspiciousWalletPrefix}
 \\- Asset: \`${asset}\`
 \\- From: \`${fromAddress}\` [(dexscreener)](https://dexscreener.com/base/${fromAddress}) [(basescan)](https://basescan.org/address/${fromAddress})
 \\- To: \`${toAddress}\` [(dexscreener)](https://dexscreener.com/base/${toAddress}) [(basescan)](https://basescan.org/address/${toAddress})
