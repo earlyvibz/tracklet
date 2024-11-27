@@ -122,117 +122,82 @@ async function main(): Promise<void> {
   );
   app.use(validateAlchemySignature(signingKey));
 
-  app.post("/webhook-path", async (req, res) => {
-    const hotwallets = [
+  const WALLETS = {
+    hot: new Set([
       "0xd2507b4958b449695201599e8d8a25f4bab5dead",
       "0x6fb5489c6d6c11150e68d6d87dca963beb28d5b0",
       "0xc51e5421608efc404b76fcf4da7d44cdd8481903",
       "0x8bb8fa6ce99208c1cddea7006679145a490ee58f",
-    ];
+    ]),
+    whales: new Set(["0x6552d32C1a0563d6bD434C761771341058862f78"]),
+    multipliers: new Set(["0xbdb902244f1235fc686b2af74f0e73163d47fa08"]),
+    suspicious: new Set(["0x00081fbbd7175d902b459dc85f7da70cbd000000"]),
+  };
 
-    const whales = ["0x6552d32C1a0563d6bD434C761771341058862f78"];
+  const IGNORED_ASSETS = new Set(["ETH", "WEТH", "UЅDС", "VIRTUAL"]);
 
-    const bigMultipliers = ["0xbdb902244f1235fc686b2af74f0e73163d47fa08"];
-
-    const suspiciousWallets = ["0x00081fbbd7175d902b459dc85f7da70cbd000000"];
-
+  app.post("/webhook-path", async (req, res) => {
     const webhookEvent = req.body as AlchemyWebhookEvent;
-    console.log("Received webhook event:", webhookEvent);
 
     try {
-      if (
-        !webhookEvent.event ||
-        !webhookEvent.event.activity ||
-        !Array.isArray(webhookEvent.event.activity)
-      ) {
-        throw new Error(
-          "Invalid webhook payload: 'event.activity' is missing or invalid."
-        );
+      if (!webhookEvent?.event?.activity?.length) {
+        throw new Error("Invalid webhook payload");
       }
 
-      for (const activity of webhookEvent.event.activity) {
-        const {
-          asset,
-          fromAddress,
-          toAddress,
-          hash,
-          blockNum,
-          erc721TokenId,
-          erc1155Metadata,
-        } = activity;
+      await Promise.all(
+        webhookEvent.event.activity.map(async (activity: any) => {
+          const {
+            asset,
+            fromAddress,
+            toAddress,
+            hash,
+            blockNum,
+            erc721TokenId,
+            erc1155Metadata,
+          } = activity;
 
-        if (!asset || !fromAddress || !toAddress || !hash || !blockNum) {
-          console.warn("Invalid activity data:", activity);
-          continue;
-        }
+          if (!asset || !fromAddress || !toAddress || !hash || !blockNum)
+            return;
+          if (IGNORED_ASSETS.has(asset)) return;
+          if (erc721TokenId || erc1155Metadata) return;
 
-        if (
-          asset === "ETH" ||
-          asset === "WEТH" ||
-          asset === "UЅDС" ||
-          asset === "VIRTUAL"
-        ) {
-          continue;
-        }
+          const prefixes = [];
+          if (WALLETS.hot.has(fromAddress) || WALLETS.hot.has(toAddress))
+            prefixes.push("🔥 HOT WALLET ALERT 🔥");
+          if (WALLETS.whales.has(fromAddress) || WALLETS.whales.has(toAddress))
+            prefixes.push("🐳 WHALE ALERT 🐳");
+          if (
+            WALLETS.multipliers.has(fromAddress) ||
+            WALLETS.multipliers.has(toAddress)
+          )
+            prefixes.push("💰 BIG MULTIPLIER ALERT 💰");
+          if (
+            WALLETS.suspicious.has(fromAddress) ||
+            WALLETS.suspicious.has(toAddress)
+          )
+            prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
-        if (erc721TokenId || erc1155Metadata) {
-          continue;
-        }
-
-        const isHotWallet =
-          hotwallets.includes(fromAddress) || hotwallets.includes(toAddress);
-        const hotWalletPrefix = isHotWallet ? "🔥 HOT WALLET ALERT 🔥\n" : "";
-
-        const isWhale =
-          whales.includes(fromAddress) || whales.includes(toAddress);
-        const whalePrefix = isWhale ? "🐳 WHALE ALERT 🐳\n" : "";
-
-        const isBigMultiplier =
-          bigMultipliers.includes(fromAddress) ||
-          bigMultipliers.includes(toAddress);
-        const bigMultiplierPrefix = isBigMultiplier
-          ? "💰 BIG MULTIPLIER ALERT 💰\n"
-          : "";
-
-        const isSuspiciousWallet =
-          suspiciousWallets.includes(fromAddress) ||
-          suspiciousWallets.includes(toAddress);
-        const suspiciousWalletPrefix = isSuspiciousWallet
-          ? "🚨 SUSPICIOUS WALLET ALERT 🚨\n"
-          : "";
-
-        const message = `
-${hotWalletPrefix}
-${whalePrefix}
-${bigMultiplierPrefix}
-${suspiciousWalletPrefix}
+          const message = `
+${prefixes.join("\n")}
 \\- Asset: \`${asset}\`
 \\- From: \`${fromAddress}\` [(dexscreener)](https://dexscreener.com/base/${fromAddress}) [(basescan)](https://basescan.org/address/${fromAddress})
 \\- To: \`${toAddress}\` [(dexscreener)](https://dexscreener.com/base/${toAddress}) [(basescan)](https://basescan.org/address/${toAddress})
-\\- [View Transaction](https://basescan.org/tx/${hash})
-      `;
+\\- [View Transaction](https://basescan.org/tx/${hash})`;
 
-        try {
-          await bot.sendMessage(telegramChatId, message, {
-            parse_mode: "Markdown",
-          });
-          console.log(
-            "Notification sent to Telegram successfully for activity:",
-            hash
-          );
-        } catch (error) {
-          console.error(
-            "Error sending Telegram message for activity:",
-            hash,
-            error
-          );
-        }
-      }
+          try {
+            await bot.sendMessage(telegramChatId, message, {
+              parse_mode: "Markdown",
+            });
+          } catch (error) {
+            console.error("Telegram error:", hash, error);
+          }
+        })
+      );
 
-      res.status(200).send("Webhook processed successfully.");
+      res.status(200).send("Success");
     } catch (error) {
-      console.error("Error processing webhook:", error);
-      res.status(500).send("Failed to process the webhook.");
+      console.error("Webhook error:", error);
+      res.status(500).send("Error");
     }
   });
 
