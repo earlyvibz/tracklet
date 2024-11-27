@@ -134,7 +134,7 @@ async function main(): Promise<void> {
     suspicious: new Set(["0x00081fbbd7175d902b459dc85f7da70cbd000000"]),
   };
 
-  const IGNORED_ASSETS = new Set(["ETH", "WEТH", "UЅDС", "VIRTUAL"]);
+  const IGNORED_ASSETS = new Set(["ETH", "WEТH", "UЅDС", "VIRTUAL", "WALLY"]);
 
   app.post("/webhook-path", async (req, res) => {
     const webhookEvent = req.body as AlchemyWebhookEvent;
