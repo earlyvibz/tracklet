@@ -174,6 +174,7 @@ async function main(): Promise<void> {
         if (erc721TokenId || erc1155Metadata) return;
 
         let marketCap = "N/A";
+        let dexPairAddress = "";
         try {
           const dexScreenerResponse = await fetch(
             `https://api.dexscreener.com/latest/dex/tokens/${rawContract.address}`,
@@ -191,6 +192,9 @@ async function main(): Promise<void> {
           marketCap = dexScreenerData.pairs[0].marketCap
             ? formatMarketCap(dexScreenerData.pairs[0].marketCap)
             : "N/A";
+
+          dexPairAddress =
+            dexScreenerData.pairs[0].pairAddress?.toLowerCase() || "";
         } catch (error) {
           console.error(
             `Failed to fetch marketcap for ${rawContract.address}:`,
@@ -214,13 +218,12 @@ async function main(): Promise<void> {
         )
           prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
-        const contractAddress = rawContract.address.toLowerCase();
         const userWallet =
-          fromAddress.toLowerCase() === contractAddress
+          fromAddress.toLowerCase() === dexPairAddress
             ? toAddress
             : fromAddress;
         const tradeType =
-          fromAddress.toLowerCase() === contractAddress
+          fromAddress.toLowerCase() === dexPairAddress
             ? "🟢 BOUGHT"
             : "🔴 SOLD";
 
