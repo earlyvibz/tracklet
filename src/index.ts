@@ -210,8 +210,10 @@ async function main(): Promise<void> {
           prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
         const isSell = fromAddress !== rawContract.address;
-        const userWallet = isSell ? fromAddress : toAddress;
-        const tradeType = isSell ? "🔴 SOLD" : "🟢 BOUGHT";
+        const userWallet =
+          fromAddress === rawContract.address ? toAddress : fromAddress;
+        const tradeType =
+          fromAddress === rawContract.address ? "🟢 BOUGHT" : "🔴 SOLD";
 
         const message = `
 ${prefixes.join("\n")}
