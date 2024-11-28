@@ -130,7 +130,7 @@ async function main(): Promise<void> {
       "0x8bb8fa6ce99208c1cddea7006679145a490ee58f",
     ]),
     whales: new Set(["0x6552d32C1a0563d6bD434C761771341058862f78"]),
-    multipliers: new Set(["0xbdb902244f1235fc686b2af74f0e73163d47fa08"]),
+    multipliers: new Set([""]),
     suspicious: new Set(["0x00081fbbd7175d902b459dc85f7da70cbd000000"]),
   };
 
