@@ -183,7 +183,10 @@ async function main(): Promise<void> {
             }
           );
           const dexScreenerData = await dexScreenerResponse.json();
-          marketCap = dexScreenerData?.pairs?.[0]?.marketCap
+
+          if (!dexScreenerData?.pairs?.[0]) return;
+
+          marketCap = dexScreenerData.pairs[0].marketCap
             ? formatMarketCap(dexScreenerData.pairs[0].marketCap)
             : "N/A";
         } catch (error) {
