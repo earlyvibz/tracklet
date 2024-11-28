@@ -134,7 +134,14 @@ async function main(): Promise<void> {
     suspicious: new Set(["0x00081fbbd7175d902b459dc85f7da70cbd000000"]),
   };
 
-  const IGNORED_ASSETS = new Set(["ETH", "WEТH", "UЅDС", "VIRTUAL", "WALLY"]);
+  const IGNORED_ASSETS = new Set([
+    "ETH",
+    "WEТH",
+    "UЅDС",
+    "VIRTUAL",
+    "WALLY",
+    "Rizzmas",
+  ]);
 
   app.post("/webhook-path", async (req, res) => {
     res.status(200).send("Success");
