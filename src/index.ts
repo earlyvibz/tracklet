@@ -137,73 +137,98 @@ async function main(): Promise<void> {
   const IGNORED_ASSETS = new Set(["ETH", "WEТH", "UЅDС", "VIRTUAL", "WALLY"]);
 
   app.post("/webhook-path", async (req, res) => {
+    res.status(200).send("Success");
+
     const webhookEvent = req.body as AlchemyWebhookEvent;
 
-    try {
-      if (!webhookEvent?.event?.activity?.length) {
-        throw new Error("Invalid webhook payload");
-      }
+    if (!webhookEvent?.event?.activity?.length) {
+      console.error("Invalid webhook payload");
+      return;
+    }
 
-      await Promise.all(
-        webhookEvent.event.activity.map(async (activity: any) => {
-          const {
-            asset,
-            fromAddress,
-            toAddress,
-            hash,
-            blockNum,
-            erc721TokenId,
-            erc1155Metadata,
-            rawContract,
-            value,
-          } = activity;
+    const formatMarketCap = (value: number) => {
+      if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+      if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+      if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}k`;
+      return `$${value}`;
+    };
 
-          if (!asset || !fromAddress || !toAddress || !hash || !blockNum)
-            return;
-          if (IGNORED_ASSETS.has(asset)) return;
-          if (erc721TokenId || erc1155Metadata) return;
+    await Promise.all(
+      webhookEvent.event.activity.map(async (activity: any) => {
+        const {
+          asset,
+          fromAddress,
+          toAddress,
+          hash,
+          blockNum,
+          erc721TokenId,
+          erc1155Metadata,
+          rawContract,
+          value,
+        } = activity;
 
-          const prefixes = [];
-          if (WALLETS.hot.has(fromAddress) || WALLETS.hot.has(toAddress))
-            prefixes.push("🔥 HOT WALLET ALERT 🔥");
-          if (WALLETS.whales.has(fromAddress) || WALLETS.whales.has(toAddress))
-            prefixes.push("🐳 WHALE ALERT 🐳");
-          if (
-            WALLETS.multipliers.has(fromAddress) ||
-            WALLETS.multipliers.has(toAddress)
-          )
-            prefixes.push("💰 BIG MULTIPLIER ALERT 💰");
-          if (
-            WALLETS.suspicious.has(fromAddress) ||
-            WALLETS.suspicious.has(toAddress)
-          )
-            prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
+        if (!asset || !fromAddress || !toAddress || !hash || !blockNum) return;
+        if (IGNORED_ASSETS.has(asset)) return;
+        if (erc721TokenId || erc1155Metadata) return;
 
-          const message = `
+        let marketCap = "N/A";
+        try {
+          const dexScreenerResponse = await fetch(
+            `https://dexscreener.com/base/${rawContract.address}`,
+            {
+              headers: {
+                Accept: "application/json",
+                "User-Agent": "Mozilla/5.0",
+              },
+            }
+          );
+          const dexScreenerData = await dexScreenerResponse.json();
+          marketCap = dexScreenerData?.pairs?.[0]?.marketCap
+            ? formatMarketCap(dexScreenerData.pairs[0].marketCap)
+            : "N/A";
+        } catch (error) {
+          console.error(
+            `Failed to fetch marketcap for ${rawContract.address}:`,
+            error
+          );
+        }
+
+        const prefixes = [];
+        if (WALLETS.hot.has(fromAddress) || WALLETS.hot.has(toAddress))
+          prefixes.push("🔥 HOT WALLET ALERT 🔥");
+        if (WALLETS.whales.has(fromAddress) || WALLETS.whales.has(toAddress))
+          prefixes.push("🐳 WHALE ALERT 🐳");
+        if (
+          WALLETS.multipliers.has(fromAddress) ||
+          WALLETS.multipliers.has(toAddress)
+        )
+          prefixes.push("💰 BIG MULTIPLIER ALERT 💰");
+        if (
+          WALLETS.suspicious.has(fromAddress) ||
+          WALLETS.suspicious.has(toAddress)
+        )
+          prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
+
+        const message = `
 ${prefixes.join("\n")}
 \\- Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
-            rawContract.address
-          })
+          rawContract.address
+        })
+\\- MC: \`${marketCap}\`
 \\- From: \`${fromAddress}\`
 \\- To: \`${toAddress}\`
 \\- Value: \`${value}\`
 \\- [View Transaction](https://basescan.org/tx/${hash})`;
 
-          try {
-            await bot.sendMessage(telegramChatId, message, {
-              parse_mode: "Markdown",
-            });
-          } catch (error) {
-            console.error("Telegram error:", hash, error);
-          }
-        })
-      );
-
-      res.status(200).send("Success");
-    } catch (error) {
-      console.error("Webhook error:", error);
-      res.status(500).send("Error");
-    }
+        try {
+          await bot.sendMessage(telegramChatId, message, {
+            parse_mode: "Markdown",
+          });
+        } catch (error) {
+          console.error("Telegram error:", hash, error);
+        }
+      })
+    );
   });
 
   app.listen(port, host, () => {
