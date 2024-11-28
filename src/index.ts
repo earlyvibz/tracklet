@@ -217,7 +217,7 @@ async function main(): Promise<void> {
 ${prefixes.join("\n")}
 \\- 💎 Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
           rawContract.address
-        })
+        }?maker=${userWallet})
 \\- 💰 Contract: \`${rawContract.address}\`
 \\- 💰 MC: \`${marketCap}\`
 \\- 👤 User (\`${tradeType}\`): \`${userWallet}\`
