@@ -211,14 +211,14 @@ async function main(): Promise<void> {
 
         const message = `
 ${prefixes.join("\n")}
-\\- Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
+\\- 💎 Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
           rawContract.address
         })
-\\- MC: \`${marketCap}\`
-\\- From: \`${fromAddress}\`
-\\- To: \`${toAddress}\`
-\\- Value: \`${value}\`
-\\- [View Transaction](https://basescan.org/tx/${hash})`;
+\\- 💰 MC: \`${marketCap}\`
+\\- 📤 From: \`${fromAddress}\`
+\\- 📥 To: \`${toAddress}\`
+\\- 💵 Value: \`${value}\`
+\\- 🔍 [View Transaction](https://basescan.org/tx/${hash})`;
 
         try {
           await bot.sendMessage(telegramChatId, message, {
