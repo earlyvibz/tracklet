@@ -157,15 +157,17 @@ async function main(): Promise<void> {
       webhookEvent.event.activity.map(async (activity: any) => {
         const {
           asset,
-          fromAddress,
-          toAddress,
           hash,
           blockNum,
           erc721TokenId,
           erc1155Metadata,
           rawContract,
           value,
+          log,
         } = activity;
+
+        const fromAddress = `0x${log.topics[1].slice(26)}`;
+        const toAddress = `0x${log.topics[2].slice(26)}`;
 
         if (!asset || !fromAddress || !toAddress || !hash || !blockNum) return;
         if (IGNORED_ASSETS.has(asset)) return;
@@ -212,21 +214,13 @@ async function main(): Promise<void> {
         )
           prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
-        const fromTopic = activity.log?.topics[1]?.toLowerCase();
-        const toTopic = activity.log?.topics[2]?.toLowerCase();
-
-        const fromTopicAddress = fromTopic
-          ? `0x${fromTopic.slice(26)}`
-          : fromAddress;
-        const toTopicAddress = toTopic ? `0x${toTopic.slice(26)}` : toAddress;
-
         const contractAddress = rawContract.address.toLowerCase();
         const userWallet =
-          fromTopicAddress.toLowerCase() === contractAddress
-            ? toTopicAddress
-            : fromTopicAddress;
+          fromAddress.toLowerCase() === contractAddress
+            ? toAddress
+            : fromAddress;
         const tradeType =
-          fromTopicAddress.toLowerCase() === contractAddress
+          fromAddress.toLowerCase() === contractAddress
             ? "🟢 BOUGHT"
             : "🔴 SOLD";
 
