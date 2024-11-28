@@ -209,14 +209,18 @@ async function main(): Promise<void> {
         )
           prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
+        const isSell = fromAddress !== rawContract.address;
+        const userWallet = isSell ? fromAddress : toAddress;
+        const tradeType = isSell ? "🔴 SOLD" : "🟢 BOUGHT";
+
         const message = `
 ${prefixes.join("\n")}
 \\- 💎 Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
           rawContract.address
         })
+\\- 💰 Contract: \`${rawContract.address}\`
 \\- 💰 MC: \`${marketCap}\`
-\\- 📤 From: \`${fromAddress}\`
-\\- 📥 To: \`${toAddress}\`
+\\- 👤 User (\`${tradeType}\`): \`${userWallet}\`
 \\- 💵 Value: \`${value}\`
 \\- 🔍 [View Transaction](https://basescan.org/tx/${hash})`;
 
