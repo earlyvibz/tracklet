@@ -155,6 +155,7 @@ async function main(): Promise<void> {
             erc721TokenId,
             erc1155Metadata,
             rawContract,
+            value,
           } = activity;
 
           if (!asset || !fromAddress || !toAddress || !hash || !blockNum)
@@ -185,6 +186,7 @@ ${prefixes.join("\n")}
           })
 \\- From: \`${fromAddress}\`
 \\- To: \`${toAddress}\`
+\\- Value: \`${value}\`
 \\- [View Transaction](https://basescan.org/tx/${hash})`;
 
           try {
