@@ -212,11 +212,23 @@ async function main(): Promise<void> {
         )
           prefixes.push("🚨 SUSPICIOUS WALLET ALERT 🚨");
 
-        const isSell = fromAddress !== rawContract.address;
+        const fromTopic = activity.log?.topics[1]?.toLowerCase();
+        const toTopic = activity.log?.topics[2]?.toLowerCase();
+
+        const fromTopicAddress = fromTopic
+          ? `0x${fromTopic.slice(26)}`
+          : fromAddress;
+        const toTopicAddress = toTopic ? `0x${toTopic.slice(26)}` : toAddress;
+
+        const contractAddress = rawContract.address.toLowerCase();
         const userWallet =
-          fromAddress === rawContract.address ? toAddress : fromAddress;
+          fromTopicAddress.toLowerCase() === contractAddress
+            ? toTopicAddress
+            : fromTopicAddress;
         const tradeType =
-          fromAddress === rawContract.address ? "🟢 BOUGHT" : "🔴 SOLD";
+          fromTopicAddress.toLowerCase() === contractAddress
+            ? "🟢 BOUGHT"
+            : "🔴 SOLD";
 
         const message = `
 ${prefixes.join("\n")}
