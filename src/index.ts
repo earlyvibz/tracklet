@@ -174,7 +174,7 @@ async function main(): Promise<void> {
         let marketCap = "N/A";
         try {
           const dexScreenerResponse = await fetch(
-            `https://dexscreener.com/base/${rawContract.address}`,
+            `https://api.dexscreener.com/latest/dex/tokens/${rawContract.address}`,
             {
               headers: {
                 Accept: "application/json",
