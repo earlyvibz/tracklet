@@ -154,6 +154,7 @@ async function main(): Promise<void> {
             blockNum,
             erc721TokenId,
             erc1155Metadata,
+            rawContract,
           } = activity;
 
           if (!asset || !fromAddress || !toAddress || !hash || !blockNum)
@@ -179,9 +180,11 @@ async function main(): Promise<void> {
 
           const message = `
 ${prefixes.join("\n")}
-\\- Asset: \`${asset}\`
-\\- From: \`${fromAddress}\` [(dexscreener)](https://dexscreener.com/base/${fromAddress}) [(basescan)](https://basescan.org/address/${fromAddress})
-\\- To: \`${toAddress}\` [(dexscreener)](https://dexscreener.com/base/${toAddress}) [(basescan)](https://basescan.org/address/${toAddress})
+\\- Asset: \`${asset}\` [dexscreener](https://dexscreener.com/base/${
+            rawContract.address
+          })
+\\- From: \`${fromAddress}\`
+\\- To: \`${toAddress}\`
 \\- [View Transaction](https://basescan.org/tx/${hash})`;
 
           try {
