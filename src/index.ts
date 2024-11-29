@@ -147,6 +147,7 @@ async function main(): Promise<void> {
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     "0x4200000000000000000000000000000000000006",
     "0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b",
+    "0x653ae9c4bbd160d98c354285a7c82a9536bfe728",
   ]);
 
   app.post("/webhook-path", async (req, res) => {
