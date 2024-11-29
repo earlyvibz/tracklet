@@ -143,6 +143,12 @@ async function main(): Promise<void> {
     "Rizzmas",
   ]);
 
+  const IGNORED_CONTRACTS = new Set([
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "0x4200000000000000000000000000000000000006",
+    "0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b",
+  ]);
+
   app.post("/webhook-path", async (req, res) => {
     res.status(200).send("Success");
 
@@ -178,6 +184,7 @@ async function main(): Promise<void> {
 
         if (!asset || !fromAddress || !toAddress || !hash || !blockNum) return;
         if (IGNORED_ASSETS.has(asset)) return;
+        if (IGNORED_CONTRACTS.has(rawContract.address)) return;
         if (erc721TokenId || erc1155Metadata) return;
 
         let marketCap = "N/A";
