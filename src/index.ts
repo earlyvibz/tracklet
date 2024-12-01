@@ -141,6 +141,7 @@ async function main(): Promise<void> {
     "VIRTUAL",
     "WALLY",
     "Rizzmas",
+    "GEO",
   ]);
 
   const IGNORED_CONTRACTS = new Set([
